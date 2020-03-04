@@ -1,5 +1,5 @@
 [package]
-name = "async-bincode"
+name = "async-bincode-futures"
 version = "0.5.1"
 edition = "2018"
 
@@ -19,19 +19,11 @@ categories = ["asynchronous", "encoding", "network-programming"]
 
 license = "MIT/Apache-2.0"
 
-[badges]
-travis-ci = { repository = "jonhoo/async-bincode" }
-maintenance = { status = "passively-maintained" }
-
 [dependencies]
-bincode = "1.0.0"
-byteorder = "1.0.0"
-futures-core = "0.3.0"
-futures-sink = "0.3.0"
-serde = "1.0.8"
-tokio = { version = "0.2.0", features = ["tcp"] }
-bytes = "0.5.0"
-
-[dev-dependencies]
-futures = "0.3.0"
-tokio = { version = "0.2.0", features = ["full"] }
+bincode = "1"
+byteorder = "1"
+futures-core = "0.3"
+futures-sink = "0.3"
+serde = "1"
+bytes = "0.5"
+futures = "0.3"

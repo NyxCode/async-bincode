@@ -7,7 +7,7 @@ use std::io;
 use std::marker::PhantomData;
 use std::pin::Pin;
 use std::task::{Context, Poll};
-use tokio::io::AsyncRead;
+use futures::AsyncRead;
 
 /// A wrapper around an asynchronous reader that produces an asynchronous stream of
 /// bincode-decoded values.

@@ -6,7 +6,7 @@ use std::ops::{Deref, DerefMut};
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use std::{fmt, io};
-use tokio::io::AsyncRead;
+use futures::AsyncRead;
 
 /// A wrapper around an asynchronous stream that receives and sends bincode-encoded values.
 ///
@@ -90,41 +90,6 @@ impl<S, R, W, D> AsyncBincodeStream<S, R, W, D> {
     /// This is necessary for compatability with stock `bincode` receivers.
     pub fn for_sync(self) -> AsyncBincodeStream<S, R, W, SyncDestination> {
         AsyncBincodeStream::from(self.into_inner())
-    }
-}
-
-impl<R, W, D> AsyncBincodeStream<tokio::net::TcpStream, R, W, D> {
-    /// Split a TCP-based stream into a read half and a write half.
-    ///
-    /// This is more performant than using a lock-based split like the one provided by `tokio-io`
-    /// or `futures-util` since we know that reads and writes to a `TcpStream` can continue
-    /// concurrently.
-    ///
-    /// Any partially sent or received state is preserved.
-    pub fn tcp_split(
-        &mut self,
-    ) -> (
-        AsyncBincodeReader<tokio::net::tcp::ReadHalf, R>,
-        AsyncBincodeWriter<tokio::net::tcp::WriteHalf, W, D>,
-    ) {
-        // First, steal the reader state so it isn't lost
-        let rbuff = self.stream.buffer.split();
-        // Then, fish out the writer
-        let writer = &mut self.stream.get_mut().0;
-        // And steal the writer state so it isn't lost
-        let wbuff = writer.buffer.split_off(0);
-        let wsize = writer.written;
-        // Now split the stream
-        let (r, w) = writer.get_mut().split();
-        // Then put the reader back together
-        let mut reader = AsyncBincodeReader::from(r);
-        reader.buffer = rbuff;
-        // And then the writer
-        let mut writer: AsyncBincodeWriter<_, _, D> = AsyncBincodeWriter::from(w).make_for();
-        writer.buffer = wbuff;
-        writer.written = wsize;
-        // All good!
-        (reader, writer)
     }
 }
 

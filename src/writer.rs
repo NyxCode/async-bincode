@@ -5,7 +5,7 @@ use serde::Serialize;
 use std::marker::PhantomData;
 use std::pin::Pin;
 use std::task::{Context, Poll};
-use tokio::io::AsyncWrite;
+use futures::AsyncWrite;
 
 /// A wrapper around an asynchronous sink that accepts, serializes, and sends bincode-encoded
 /// values.
@@ -185,7 +185,7 @@ where
     fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<(), Self::Error>> {
         ready!(self.as_mut().poll_flush(cx))?;
         Pin::new(&mut self.writer)
-            .poll_shutdown(cx)
+            .poll_close(cx)
             .map_err(bincode::Error::from)
     }
 }
